@@ -1,5 +1,5 @@
 ---
-title: "【2026】GMOインターネット インフラエンジニアインターン体験記"
+title: "【2026】GMOインターネット 5days インターン体験記"
 emoji: "🖥️"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: [gmo, GMOインターネット, GMOkitaQ, sre, インフラ]
