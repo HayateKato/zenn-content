@@ -53,9 +53,9 @@ flowchart LR
 
 各サーバーのリソース使用状況を、Grafanaのダッシュボードで以下のように見れるようにする
 
-<Node Exporterの写真>
+![](/images/monitoring-system/node-exporter.png)
 
-<DCGM Exporterの写真>
+![](/images/monitoring-system/dcgm-exporter.png)
 
 ### アラート
 
@@ -72,53 +72,17 @@ flowchart LR
 | 項目 | 下位アラート | 上位アラート |
 | --- | --- | --- |
 | Node Exporterとの疎通 | - | 疎通できない |
+| DCGM Exporterとの疎通 | - | 疎通できない |
 | CPU使用率 | 80% | 90% |
 | メモリ使用率 | 80% | 90% |
 | Swap使用率 | 60% | 90% |
 | ディスク使用率 | 80% | 90% |
 
-例として、ディスク使用率90%のアラートルールは以下の通り。
-
-```yaml
-- alert: HighDiskUsage-90%
-  expr: 100 - (node_filesystem_avail_bytes{mountpoint="/"} * 100 / node_filesystem_size_bytes{mountpoint="/"}) > 90
-  for: 5m
-  labels:
-    severity: critical
-    channel: task-infrastructure
-  annotations:
-    firing_text: "Instance {{ $labels.instance }} used more than 90% of disk"
-    resolved_text: "Instance {{ $labels.instance }} disk usage is below 90%"
-```
-
-- `for: 5m`で、閾値を超えた状態が5分続いたときだけ発火させ、一時的な増加では通知しないようにしている
-- `channel`ラベルで、通知先のチャンネルを指定している
-
-Alertmanagerでは、この`channel`ラベルをもとに通知先を振り分けている。
-
-```yaml
-route:
-  receiver: 'default'
-  group_by: ['alertname', 'instance', 'severity', 'channel']
-  group_wait: 30s
-  group_interval: 5m
-  repeat_interval: 1d
-  routes:
-    # 上位アラート：サーバー管理者のチャンネル
-    - matchers:
-        - channel="task-infrastructure"
-      receiver: 'critical-alert'
-    # 下位アラート：times
-    - matchers:
-        - channel="alert"
-      receiver: 'warning-alert'
-```
-
-https://prometheus.io/docs/alerting/latest/configuration/
-
 discordへの通知は以下のようにされる。
 
-<discordへの通知の写真>
+![](/images/monitoring-system/discord_alert.png)
+
+なお、本記事ではドメインをダミーのものに差し替えている。
 
 ## 前提
 
@@ -187,6 +151,18 @@ https://docs.discord.com/developers/resources/webhook
 Discord Webhookを除く上記のツールは、すべてDockerコンテナとして動かしている。
 Webサーバーでは、もともと組織のWebサイトやGitLabなどのサービスをコンテナで運用していたため、監視基盤もそれにそろえた。
 
+### Ansible
+
+- サーバーの構築・設定を自動化する構成管理ツール
+- 対象サーバーにエージェントを入れる必要がなく、SSHで接続して操作する（エージェントレス）
+- 実行したい処理をPlaybookというYAMLファイルに記述する
+- 「あるべき状態」を宣言する形式のため、同じPlaybookを何度実行しても結果が変わらない（冪等性）
+- 複数台のサーバーに同じ設定を一括で適用できる
+
+本記事では、各サーバーへのNode Exporter / DCGM Exporterの設置・設定に使用した。
+
+https://docs.ansible.com/ansible/latest/getting_started/introduction.html
+
 ## 工夫した点
 
 ### 1. メンバーの要望を聞き、GPU監視を追加し、ダッシュボードを改善する
@@ -207,8 +183,9 @@ Webサーバーを除く12台のサーバーに手作業で設置・設定する
 また、手作業でやると設定を間違える可能性もある。
 そのため、AnsibleでNode / DCGM Exporterの設置・設定を自動化した。
 
-実際に作ったレポジトリは以下
-<レポジトリ>
+組織で使用しているものを最新版に修正したレポジトリは以下
+
+https://github.com/HayateKato/Server-Monitoring-with-Ansible
 
 ## 大変だった点
 
