@@ -3,7 +3,7 @@ title: "サーバー監視基盤を作って運用した話"
 emoji: "📊"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["prometheus", "grafana", "alertmanager", "monitoring", "gpu"]
-published: false
+published: true
 ---
 
 ## はじめに
