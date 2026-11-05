@@ -1,8 +1,8 @@
 ---
-title: "サーバー監視基盤を作って運用した話"
+title: "Prometheus×AlertManager×Grafanaでサーバー監視基盤を作って運用した話"
 emoji: "📊"
 type: "tech" # tech: 技術記事 / idea: アイデア
-topics: ["prometheus", "grafana", "alertmanager", "monitoring", "gpu"]
+topics: ["prometheus", "grafana", "alertmanager", "exporter", "gpu"]
 published: true
 ---
 
